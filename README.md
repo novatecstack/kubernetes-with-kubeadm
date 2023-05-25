@@ -16,3 +16,11 @@
    2. Portable
    3. Local Development
    4. Building blocks for other tools
+
+## Kubeadm vs kOps vs Kubespray
+   kubeadm isn’t the only tool available to deploy a K8s cluster. kOps and Kubespray are two popular tools for the same general use case. However, each tool offers different functionality that makes them ideal for different applications.
+   Before we dive into how to create the Kubeadm cluster, let's take a closer look at how it stacks up to the alternatives:
+   1. kOps
+   2. kubeSpray
+
+![image](https://github.com/novatecstack/kubernetes-with-kubeadm/assets/121426292/0b1a05d5-add2-44db-aa52-e2d6dffc0cb0)
