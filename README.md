@@ -29,7 +29,7 @@
    We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
    Let us assume that we have three Ubuntu Linux machines named Master, xWorker01, and Worker02 in the same network. For practice purposes, you can create 3 VMS in VirtualBox or you can create 3 VMs in the cloud. The VMs will be accessible from each other. We will add the necessary configuration in the master machine to make it a Kubernetes master node, and connect the worker1 and worker2 to it.
 
-### Step 1: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOS)
+### Step-01: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOS)
 ```
 #removing existing docker
 sudo yum remove docker \
@@ -74,7 +74,7 @@ CONTAINER ID        IMAGE                     COMMAND                  CREATED  
 Kubeadm will by default use docker as the container runtime interface. In case a machine has both docker and other container runtimes like <b>contained, docker takes precedence</b>. If you don't specify a container runtime interface, <b>kubeadm</b> will automatically search for the installed CRI by scanning through the default Linux domain sockets.
 
     
-### Step 2: Installing kubeadm tool (CentOS)
+### Step-02: Installing kubeadm tool (CentOS)
 ```
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -103,7 +103,7 @@ yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 systemctl enable --now kubelet
 ```
 
-### Step 3: Initializing the control plane or making the node as <b>Master</b>
+### Step-03: Initializing the control plane (making the node as) <b>Master</b>
 <b>kubeadm init</b> will initialize this machine to make it as master. <b>kubeadm init</b> first runs a series of prechecks to ensure that the machine is ready to run Kubernetes.</br></br>
 These prechecks expose warnings and exit on errors. kubeadm init then downloads and installs the cluster control plane components. This may take several minutes.</br></br>
 We have to take care that the Pod network must not overlap with any of the host networks: you are likely to see problems if there is any overlap. We will specify the private CIDR for the pods to be created.
@@ -123,3 +123,16 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
+and if you're a root user, run:
+```
+export KUBECONFIG=/etc/kubernetes/admin.conf
+```
+
+<b> Now the machine is initialized as master. </b></br>
+At this stage, if you will check the list of nodes in the K8s cluster, we will see only the master node:
+```
+kubectl get nodes
+```
+
+
+### Step-04: Installing a Pod network add-on
