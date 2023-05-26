@@ -27,9 +27,9 @@
 
 ## Setup a Kubernetes cluster (master-worker) using kubeadm
    We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
- 
+   Let us assume that we have three Ubuntu Linux machines named Master, xWorker01, and Worker02 in the same network. For practice purposes, you can create 3 VMS in VirtualBox or you can create 3 VMs in the cloud. The VMs will be accessible from each other. We will add the necessary configuration in the master machine to make it a Kubernetes master node, and connect the worker1 and worker2 to it.
 
-
+### Step 1: Installing Docker as the container runtime Interface on the three Virtual Machines
 
 
 
