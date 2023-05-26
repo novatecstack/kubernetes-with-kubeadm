@@ -29,7 +29,37 @@
    We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
    Let us assume that we have three Ubuntu Linux machines named Master, xWorker01, and Worker02 in the same network. For practice purposes, you can create 3 VMS in VirtualBox or you can create 3 VMs in the cloud. The VMs will be accessible from each other. We will add the necessary configuration in the master machine to make it a Kubernetes master node, and connect the worker1 and worker2 to it.
 
-### Step 1: Installing Docker as the container runtime Interface on the three Virtual Machines
+### Step 1: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOs)
+    '''
+    #removing existing docker
+sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
 
+sudo yum remove docker*
+
+#adding repository
+sudo yum install -y yum-utils
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+#install docker engine
+sudo yum install docker-ce docker-ce-cli containerd.iosystemctl enable docker -y
+
+#Start and automate docker to start at run time
+sudo systemctl start docker
+sudo systemctl enable docker
+
+#verify docker installation
+docker container ls
+CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS               NAMES
+    '''
+    
 
 
