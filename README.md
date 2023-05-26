@@ -29,37 +29,97 @@
    We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
    Let us assume that we have three Ubuntu Linux machines named Master, xWorker01, and Worker02 in the same network. For practice purposes, you can create 3 VMS in VirtualBox or you can create 3 VMs in the cloud. The VMs will be accessible from each other. We will add the necessary configuration in the master machine to make it a Kubernetes master node, and connect the worker1 and worker2 to it.
 
-### Step 1: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOs)
-    '''
-    #removing existing docker
+### Step 1: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOS)
+```
+#removing existing docker
 sudo yum remove docker \
-                  docker-client \
-                  docker-client-latest \
-                  docker-common \
-                  docker-latest \
-                  docker-latest-logrotate \
-                  docker-logrotate \
-                  docker-engine
-
+              docker-client \
+              docker-client-latest \
+              docker-common \
+              docker-latest \
+              docker-latest-logrotate \
+              docker-logrotate \
+              docker-engine
+```
+```
+#or simply run this command to remove all the docker specific packages
 sudo yum remove docker*
+```
 
-#adding repository
+```
+#Adding a docker repository
 sudo yum install -y yum-utils
 sudo yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
+```
 
-#install docker engine
+```
+#Install Docker engine
 sudo yum install docker-ce docker-ce-cli containerd.iosystemctl enable docker -y
+```
 
+```
 #Start and automate docker to start at run time
 sudo systemctl start docker
 sudo systemctl enable docker
+```
 
+```
 #verify docker installation
 docker container ls
 CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS               NAMES
-    '''
-    
+```
 
+Kubeadm will by default use docker as the container runtime interface. In case a machine has both docker and other container runtimes like <b>contained, docker takes precedence</b>. If you don't specify a container runtime interface, <b>kubeadm</b> will automatically search for the installed CRI by scanning through the default Linux domain sockets.
+
+    
+### Step 2: Installing kubeadm tool (CentOS)
+```
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kubelet kubeadm kubectl
+EOF
+```
+
+```
+#Set SELinux in permissive mode (effectively disabling it)
+
+setenforce 0
+sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+```
+
+```
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+```
+
+```
+systemctl enable --now kubelet
+```
+
+### Step 3: Initializing the control plane or making the node as <b>Master</b>
+<b>kubeadm init</b> will initialize this machine to make it as master. <b>kubeadm init</b> first runs a series of prechecks to ensure that the machine is ready to run Kubernetes.</br></br>
+These prechecks expose warnings and exit on errors. kubeadm init then downloads and installs the cluster control plane components. This may take several minutes.</br></br>
+We have to take care that the Pod network must not overlap with any of the host networks: you are likely to see problems if there is any overlap. We will specify the private CIDR for the pods to be created.
+```
+$ kubeadm init --pod-network-cidr 10.15.0.0/16
+```
+</br>In case you are not creating the production environment and your master machine has only one CPU (minimum recommended CPU is 2), if an error occurs due to preflight check of CPU, then run the below command:
+```
+#swapoff -a (if swap issue is seen - only in testing or practice)
+kubeadm init --ignore-preflight-errors=NumCPU --pod-network-cidr 10.15.0.0/16
+```
+
+Now, in order to use the K8s cluster, we need to run the below commands as a normal user:
+```
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
 
