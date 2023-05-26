@@ -24,3 +24,12 @@
    2. kubeSpray
 
 ![image](https://github.com/novatecstack/kubernetes-with-kubeadm/assets/121426292/0b1a05d5-add2-44db-aa52-e2d6dffc0cb0)
+
+## Setup a Kubernetes cluster (master-worker) using kubeadm
+   We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
+ 
+
+
+
+
+
