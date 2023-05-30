@@ -56,8 +56,8 @@ The below setup is for development purpose only:
 | Server Type  | Server Hostname | Specification |
 |     :---:    |     :---:      |     :---:     |
 | Master  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
-| Worker  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
-| Worker  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
+| Worker  | k8s-worker01.novatec.com	| 2 CPU, 4GB RAM |
+| Worker  | k8s-worker02.novatec.com	| 2 CPU, 4GB RAM |
 
 ### Step 2: Install kubelet, kubeadm and kubectl
 Login to all the nodes and update all the packages:
