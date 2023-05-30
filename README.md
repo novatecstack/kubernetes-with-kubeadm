@@ -163,7 +163,87 @@ sudo systemctl enable crio
 ```
 
 ### Step 5: Configure Firewalld
+```
+In order to completely disable the firewall, run:
+sudo systemctl disable --now firewalld
+```
+OR
+If you have an active firewalld service there are a number of ports to be enabled:
+```
+# (Optional) In order to check the status of Firewall status
+sudo systemctl status firewalld
+
+# (Optional) If the firewall is disabled, you may start it with command
+sudo systemctl status firewalld
+
+# On MASTER node, open traffic on these ports
+sudo firewall-cmd --add-port={6443,2379-2380,10250,10251,10252,5473,179,5473}/tcp --permanent
+sudo firewall-cmd --add-port={4789,8285,8472}/udp --permanent
+sudo firewall-cmd --reload
+```
+```
+# On WORKER nodes, open traffic on these ports
+sudo firewall-cmd --add-port={10250,30000-32767,5473,179,5473}/tcp --permanent
+sudo firewall-cmd --add-port={4789,8285,8472}/udp --permanent
+sudo firewall-cmd --reload
+```
+
 ### Step 6: Initialize your control-plane node (Master)
+
+```
+Connect to Master node and make sure that the <b>br_netfilter module</b> is loaded:
+$ lsmod | grep br_netfilter
+
+# Enable kubelet service
+sudo systemctl enable kubelet
+```
+
+```
+Now, let's initialize the machine that will run the <b>control plane components</b> which includes etcd (the cluster database) and the API Server by pulling the container images
+
+$ sudo kubeadm config images pull
+```
+
+```
+# Set the cluster endpoint DNS name or add record to /etc/hosts file. In this example 172.30.30.10 is the Control Plane system IP address
+
+$ sudo vim /etc/hosts
+172.30.30.10 k8sapi.novatec.com
+```
+
+```
+# Now create/initialize a K8s cluster
+sudo kubeadm init
+OR
+sudo kubeadm init \
+  --pod-network-cidr=192.168.0.0/16 \
+  --upload-certs \
+  --control-plane-endpoint=k8sapi.novatec.com
+```
+
+Note: If 192.168.0.0/16 is already in use within your network you must select a different pod network CIDR, replacing 192.168.0.0/16 in the above command.
+
+It might ~4-5 minutes in order to initilize your K8s cluster.
+
+```
+# On Master node, configure kubectl using commands in the output:
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+Its time to check the cluster status
+```
+$ kubectl cluster-info
+[As an output of this command, it should say that cluster is running k8sapi.novatec.com:6443]
+
+Additional Master nodes can be added using the command in installation output:
+kubeadm join k8sapi.novatec.com:6443 \
+  --token <token> \
+  --discovery-token-ca-cert-hash sha256:984150bc8780ddf0c3ff9cdsdfs345v3v54f6a3848f49825e5 \
+  --control-plane
+```
+
 ### Step 7: Install network plugin
 ### Step 8: Add worker nodes to the K8s cluster
 ### Step 9: Deploy application on cluster
