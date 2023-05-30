@@ -29,6 +29,19 @@
    We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
    Let us assume that we have three Ubuntu Linux machines named Master, xWorker01, and Worker02 in the same network. For practice purposes, you can create 3 VMS in VirtualBox or you can create 3 VMs in the cloud. The VMs will be accessible from each other. We will add the necessary configuration in the master machine to make it a Kubernetes master node, and connect the worker1 and worker2 to it.
 
+- Step 1: Prepare Kubernetes Servers
+- Step 2: Install kubelet, kubeadm and kubectl
+- Step 3: Disable SELinux and Swap
+- Step 4: Install Container runtime
+- Step 5: Configure Firewalld
+- Step 6: Initialize your control-plane node (Master)
+- Step 7: Install network plugin
+- Step 8: Add worker nodes to the K8s cluster
+- Step 9: Deploy application on cluster
+- Step 10: Install Kubernetes Dashboard (Optional)
+- Step 11: Install an Ingress Controller
+- Step 12: Configure Persistent volume storage
+
 ### Step-01: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOS)
 ```
 #removing existing docker
