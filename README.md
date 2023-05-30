@@ -22,13 +22,16 @@
    Before we dive into how to create the Kubeadm cluster, let's take a closer look at how it stacks up to the alternatives:
    1. kOps
    2. kubeSpray
+   3. RKE (Rancher Kubernetes Engines)
 
 ![image](https://github.com/novatecstack/kubernetes-with-kubeadm/assets/121426292/0b1a05d5-add2-44db-aa52-e2d6dffc0cb0)
 
 ## Setup a Kubernetes cluster (master-worker) using kubeadm
    We will consider building a Kubernetes setup with <b>one Master node</b> and <b>two Worker nodes</b>.
-   Let us assume that we have three Ubuntu Linux machines named Master, xWorker01, and Worker02 in the same network. For practice purposes, you can create 3 VMS in VirtualBox or you can create 3 VMs in the cloud. The VMs will be accessible from each other. We will add the necessary configuration in the master machine to make it a Kubernetes master node, and connect the worker1 and worker2 to it.
+   Here, we will discuss in detail the process of deploying a minimal Kubernetes cluster on CentOS 7 servers. This installation is for a single control-plane cluster.
+</br> 
 
+Below are the steps we'll perform in order to setup K8s cluster:
 - Step 1: Prepare Kubernetes Servers
 - Step 2: Install kubelet, kubeadm and kubectl
 - Step 3: Disable SELinux and Swap
@@ -42,110 +45,29 @@
 - Step 11: Install an Ingress Controller
 - Step 12: Configure Persistent volume storage
 
-### Step-01: Installing Docker as the container runtime Interface on the three Virtual Machines (CentOS)
-```
-#removing existing docker
-sudo yum remove docker \
-              docker-client \
-              docker-client-latest \
-              docker-common \
-              docker-latest \
-              docker-latest-logrotate \
-              docker-logrotate \
-              docker-engine
-```
-```
-#or simply run this command to remove all the docker specific packages
-sudo yum remove docker*
-```
+### Step 1: Prepare Kubernetes Servers
+The minimal server requirements for the servers used in the cluster are:
+- 2 GiB or above RAM per machine–any less leaves little room for your apps
+- 2 CPUs on the control-plane node
+- Network connectivity between all the machines in K8s cluster
 
-```
-#Adding a docker repository
-sudo yum install -y yum-utils
-sudo yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-```
+The below setup is for development purpose only:
+| Server Type  | Server Hostname | Specification |
+|     :---:    |     :---:      |     :---:     |
+| Master  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
+| Worker  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
+| Worker  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
 
-```
-#Install Docker engine
-sudo yum install docker-ce docker-ce-cli containerd.iosystemctl enable docker -y
-```
+Login to all the
+### Step 2: Install kubelet, kubeadm and kubectl
 
-```
-#Start and automate docker to start at run time
-sudo systemctl start docker
-sudo systemctl enable docker
-```
-
-```
-#verify docker installation
-docker container ls
-CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS               NAMES
-```
-
-Kubeadm will by default use docker as the container runtime interface. In case a machine has both docker and other container runtimes like <b>contained, docker takes precedence</b>. If you don't specify a container runtime interface, <b>kubeadm</b> will automatically search for the installed CRI by scanning through the default Linux domain sockets.
-
-    
-### Step-02: Installing kubeadm tool (CentOS)
-```
-cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-exclude=kubelet kubeadm kubectl
-EOF
-```
-
-```
-#Set SELinux in permissive mode (effectively disabling it)
-
-setenforce 0
-sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
-```
-
-```
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-```
-
-```
-systemctl enable --now kubelet
-```
-
-### Step-03: Initializing the control plane (making the node as) <b>Master</b>
-<b>kubeadm init</b> will initialize this machine to make it as master. <b>kubeadm init</b> first runs a series of prechecks to ensure that the machine is ready to run Kubernetes.</br></br>
-These prechecks expose warnings and exit on errors. kubeadm init then downloads and installs the cluster control plane components. This may take several minutes.</br></br>
-We have to take care that the Pod network must not overlap with any of the host networks: you are likely to see problems if there is any overlap. We will specify the private CIDR for the pods to be created.
-```
-$ kubeadm init --pod-network-cidr 10.15.0.0/16
-```
-</br>In case you are not creating the production environment and your master machine has only one CPU (minimum recommended CPU is 2), if an error occurs due to preflight check of CPU, then run the below command:
-```
-#swapoff -a (if swap issue is seen - only in testing or practice)
-kubeadm init --ignore-preflight-errors=NumCPU --pod-network-cidr 10.15.0.0/16
-```
-
-Now, in order to use the K8s cluster, we need to run the below commands as a normal user:
-```
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-```
-
-and if you're a root user, run:
-```
-export KUBECONFIG=/etc/kubernetes/admin.conf
-```
-
-<b> Now the machine is initialized as master. </b></br>
-At this stage, if you will check the list of nodes in the K8s cluster, we will see only the master node:
-```
-kubectl get nodes
-```
-
-
-### Step-04: Installing a Pod network add-on
+### Step 3: Disable SELinux and Swap
+### Step 4: Install Container runtime
+### Step 5: Configure Firewalld
+### Step 6: Initialize your control-plane node (Master)
+### Step 7: Install network plugin
+### Step 8: Add worker nodes to the K8s cluster
+### Step 9: Deploy application on cluster
+### Step 10: Install Kubernetes Dashboard (Optional)
+### Step 11: Install an Ingress Controller
+### Step 12: Configure Persistent volume storage
