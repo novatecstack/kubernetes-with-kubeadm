@@ -1,4 +1,5 @@
-# Creating a Kubernetes cluster with kubeadm
+# Create a Kubernetes cluster with kubeadm and CRI-O (as a container runtime)
+
   - Kubeadm is a tool used to build Kubernetes (K8s) clusters. 
   - Kubeadm performs the actions necessary to get a minimum viable cluster up and running quickly. 
   - By design, it cares only about bootstrapping, not about provisioning machines (underlying worker and master nodes). 
