@@ -58,11 +58,71 @@ The below setup is for development purpose only:
 | Worker  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
 | Worker  | k8s-master01.novatec.com	| 2 CPU, 4GB RAM |
 
-Login to all the
 ### Step 2: Install kubelet, kubeadm and kubectl
+Login to all the nodes and update all the packages:
+```
+sudo yum -y update && sudo systemctl reboot
+```
+
+After server reboot, add Kubernetes repository for CentOS 7 to all the nodes.
+```
+sudo tee /etc/yum.repos.d/kubernetes.repo<<EOF
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+```
+Then install required packages:
+```
+sudo yum clean all && sudo yum -y makecache
+sudo yum -y install epel-release vim git curl wget kubelet kubeadm kubectl --disableexcludes=kubernetes
+```
+</br>
+
+Check if the kubectl and kubeadm installation was successful by checking the version details:
+```
+$ kubeadm  version
+$ kubectl version --client
+```
 
 ### Step 3: Disable SELinux and Swap
-### Step 4: Install Container runtime
+If you have SELinux in enforcing mode, turn it off or use Permissive mode.
+```
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=.*/SELINUX=permissive/g' /etc/selinux/config
+```
+Also turnoff swap:
+```
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sudo swapoff -a
+```
+Configure sysctl:
+```
+sudo modprobe overlay
+sudo modprobe br_netfilter
+sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+```
+```
+sudo sysctl --system
+```
+
+### Step 4: Install Container Runtime
+In order to enable containers to run in Pods inside K8s cluster, container runtime is required. Some of the K8s supported container runtimes are:
+- CRI-O (Container Runtime Interface)
+- Containerd
+- Docker
+
+Install CRI-O as Container runtime
+
+
 ### Step 5: Configure Firewalld
 ### Step 6: Initialize your control-plane node (Master)
 ### Step 7: Install network plugin
